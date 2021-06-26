@@ -15,8 +15,14 @@ def chw2hwc(image):
 
 
 def imwrite(path, image, gamma):
-    image_bits = (np.power(np.clip(image, 0.0, 1.0), 1 / gamma) * 255).astype(np.uint8)
-    skimage.io.imsave(path, image_bits)
+    if path.suffix == ".exr":
+        imageio.imwrite(path, image.astype(np.float32))
+    elif path.suffix == ".png":
+        image_clip = np.clip(image, 0.0, 1.0)
+        image_bits = (np.power(image_clip, 1 / gamma) * 255).astype(np.uint8)
+        skimage.io.imsave(path, image_bits)
+    else:
+        raise NotImplementedError()
 
 
 def write_video(frames, fps, path):
