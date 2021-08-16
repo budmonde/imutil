@@ -18,7 +18,12 @@ def imwrite(path, image, gamma):
         imageio.imwrite(path, image.astype(np.float32))
     elif path.suffix == ".png":
         image_clip = np.clip(image, 0.0, 1.0)
-        image_bits = (np.power(image_clip, 1 / gamma) * 255).astype(np.uint8)
+        if image.shape[-1] == 4:
+            image_bits = (np.power(image_clip[..., :3], 1 / gamma) * 255).astype(np.uint8)
+            alpha_bits = (image_clip[..., -1:] * 255).astype(np.uint8)
+            image_bits = np.concatenate([image_bits, alpha_bits], axis=-1)
+        else:
+            image_bits = (np.power(image_clip, 1 / gamma) * 255).astype(np.uint8)
         skimage.io.imsave(path, image_bits)
     else:
         raise NotImplementedError()
